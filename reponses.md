@@ -111,3 +111,73 @@ Les messages exacts dépendent du compilateur utilisé. Les premiers messages at
 | B | `main.o` garde l'ancienne définition de `Maillon`, tandis que `liste.o` utilise la nouvelle. Les deux fichiers peuvent alors interpréter la structure différemment et le programme risque de mal fonctionner. |
 
 La dépendance à `liste.h` est bien présente dans le Makefile final.
+
+## Exercice 6
+
+| Mesure | Sans fuite | Avec une liste de 3 maillons oubliée |
+| --- | ---: | ---: |
+| Après construction de la première liste | 5 | 5 |
+| Après sa libération | 0 | 0 |
+| Compteur final après ajout de la seconde liste | 0 | 3 |
+
+| Question | Réponse |
+| --- | --- |
+| A | Le compteur et les fonctions de suivi sont `static` car ils ne servent qu'à `liste.c`. Le `.h` ne déclare que les fonctions accessibles depuis les autres fichiers. |
+| B | Un échec de `malloc` ferait compter une allocation qui n'a pas eu lieu. Décrémenter pour `NULL` ferait baisser le compteur sans libérer de bloc. |
+| C | Non. Je peux afficher le compteur après chaque allocation et libération pour réduire l'endroit où chercher, puis examiner les appels de la zone concernée. |
+
+## Exercice 7
+
+Pour une liste oubliée de trois maillons, le compteur reste à 3. L'outil classe normalement le premier maillon comme `definitely lost` et les deux suivants comme `indirectly lost`, car ils restent accessibles depuis le premier maillon perdu.
+
+| Mesure | Sans fuite | Avec fuite |
+| --- | ---: | ---: |
+| `definitely lost` | 0 octet | `sizeof(Maillon)` |
+| `indirectly lost` | 0 octet | `2 * sizeof(Maillon)` |
+| Allocations / libérations du module | 5 / 5 | 8 / 5 |
+| Compteur final | 0 | 3 |
+
+Sur une cible où `Maillon` fait 16 octets, la fuite représente 48 octets. Cette taille dépend de la plateforme.
+
+| Question | Réponse |
+| --- | --- |
+| A | La pile remonte à la ligne de `main.c` qui construit la liste oubliée. Le `free` manquant concerne la tête de cette seconde liste, et donc aussi les maillons qui la suivent. |
+| B | Un maillon est perdu directement et les deux autres indirectement, car on pouvait les atteindre en suivant les pointeurs depuis le premier. |
+| C | Sans fuite : 5 allocations et 5 libérations. Avec fuite : 8 allocations et 5 libérations. Il y a une allocation par maillon ; le nombre inclut donc tous les maillons construits dans les deux listes. |
+
+## Exercice 8
+
+| Observation | Résultat attendu sans outil |
+| --- | --- |
+| Sortie affichée | `42` |
+| Code de sortie | 0 sur une exécution habituelle, mais le comportement est indéfini |
+| Message de l'outil | AddressSanitizer signale un `heap-buffer-overflow` à l'accès `t[5]`; Valgrind signale un accès invalide juste après le bloc |
+
+| Question | Réponse |
+| --- | --- |
+| A | Non. Il y a un `malloc` et un `free`, donc le compteur revient à zéro. Il ne détecte pas le dépassement. |
+| B | Le bloc contient cinq entiers, soit 20 octets si `int` fait 4 octets. `t[5]` commence exactement après ces 20 octets, d'où le décalage de 0 octet. `t[6]` serait à 4 octets après le bloc. |
+| C | Un résultat qui semble correct ne prouve pas que le programme est valide. Ici, l'accès hors limites a un comportement indéfini. |
+| D | Le compteur sert à repérer rapidement un nombre d'allocations non libérées dans ce module. Pour trouver les lignes responsables ou repérer un accès mémoire invalide, j'utilise Valgrind ou AddressSanitizer. |
+
+## Exercice 9
+
+La fonction maximum renvoie `true` et écrit `50` pour la liste de cinq éléments. Pour `NULL`, elle renvoie `false` et ne modifie pas le résultat.
+
+Sortie finale attendue du programme :
+
+```text
+blocs apres construction : 5
+liste     : 50 -> 40 -> 30 -> 20 -> 10 -> NULL
+longueur  : 5
+contient 30 : oui
+maximum : 50
+maximum liste vide : aucun
+blocs apres liberation : 0
+liberee
+```
+
+| Question | Réponse |
+| --- | --- |
+| A | J'ai modifié `liste.h`, `liste.c` et `main.c`. Avec la règle `%.o: %.c liste.h`, `main.o` et `liste.o` sont recompilés, puis `demo` est relié. |
+| B | `-1` peut être une valeur valide de la liste. Le booléen permet de distinguer sans ambiguïté une liste vide d'un maximum égal à `-1`. |

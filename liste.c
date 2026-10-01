@@ -2,9 +2,33 @@
 #include <stdlib.h>
 #include "liste.h"
 
+/* Compteur interne : il ne suit que les allocations faites par ce module. */
+static int blocs = 0;
+
+static void *suivi_malloc(size_t taille)
+{
+    void *p = malloc(taille);
+    if (p != NULL)
+        blocs++;
+    return p;
+}
+
+static void suivi_free(void *p)
+{
+    if (p != NULL) {
+        blocs--;
+        free(p);
+    }
+}
+
+int liste_blocs_en_circulation(void)
+{
+    return blocs;
+}
+
 Maillon *liste_inserer(Maillon *tete, int valeur)
 {
-    Maillon *m = malloc(sizeof *m);
+    Maillon *m = suivi_malloc(sizeof *m);
     if (m == NULL) {
         perror("malloc");
         exit(EXIT_FAILURE);
@@ -41,7 +65,21 @@ void liste_liberer(Maillon *tete)
 {
     while (tete != NULL) {
         Maillon *suivant = tete->suivant;
-        free(tete);
+        suivi_free(tete);
         tete = suivant;
     }
+}
+
+bool liste_maximum(const Maillon *tete, int *resultat)
+{
+    if (tete == NULL || resultat == NULL)
+        return false;
+
+    int max = tete->valeur;
+    for (const Maillon *m = tete->suivant; m != NULL; m = m->suivant)
+        if (m->valeur > max)
+            max = m->valeur;
+
+    *resultat = max;
+    return true;
 }
