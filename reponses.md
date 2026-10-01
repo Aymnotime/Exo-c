@@ -147,11 +147,13 @@ Sur une cible où `Maillon` fait 16 octets, la fuite représente 48 octets. Cett
 
 ## Exercice 8
 
-| Observation | Résultat attendu sans outil |
+J'ai compilé et lancé `deborde.c` sous Windows avec Zig 0.16.0. Sans outil, le programme affiche `42` et renvoie le code 0. La compilation avec AddressSanitizer n'a pas abouti : le compilateur n'a pas trouvé le runtime ASan (`undefined symbol: __asan_report_store4` et d'autres symboles `__asan_*`). Je n'ai donc pas obtenu de rapport d'exécution de l'outil.
+
+| Observation | Résultat obtenu sans outil |
 | --- | --- |
 | Sortie affichée | `42` |
-| Code de sortie | 0 sur une exécution habituelle, mais le comportement est indéfini |
-| Message de l'outil | AddressSanitizer signale un `heap-buffer-overflow` à l'accès `t[5]`; Valgrind signale un accès invalide juste après le bloc |
+| Code de sortie | 0 sur cette exécution; le comportement reste indéfini |
+| Avec AddressSanitizer | Échec à l'édition de liens, runtime ASan absent |
 
 | Question | Réponse |
 | --- | --- |
@@ -164,7 +166,7 @@ Sur une cible où `Maillon` fait 16 octets, la fuite représente 48 octets. Cett
 
 La fonction maximum renvoie `true` et écrit `50` pour la liste de cinq éléments. Pour `NULL`, elle renvoie `false` et ne modifie pas le résultat.
 
-Sortie finale attendue du programme :
+Sortie obtenue en compilant avec `-Wall -Wextra -Werror -std=c11 -g` et en lançant le programme :
 
 ```text
 blocs apres construction : 5
