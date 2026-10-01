@@ -1,5 +1,53 @@
 # Réponses — TP séance 7 (jusqu'à l'exercice 5)
 
+## Sortie de `exo.c` fourni (TP de révision)
+
+Cette sortie correspond au programme de révision fourni à côté de l'énoncé. Elle sert de référence pour reprendre les fonctions de liste à l'exercice 1 ; elle est distincte de la sortie plus courte du `main.c` de ce TP.
+
+```text
+Pret.
+--- R1 : entiers ---
+ int max       = 2147483647
+ int max + 1   = non defini par la norme C
+ uint max      = 4294967295
+ uint max + 1  = 0
+ -7 % 3        = -1
+--- R2 : tableaux et chaines ---
+ mot            = bonjour
+ strlen(mot)    = 7
+ sizeof(mot)    = 20
+ a == b         = false
+ strcmp(a,b)==0 = true
+--- R3 : structures ---
+ p.nom            = Camille
+ ptr->nom         = Camille
+ (*ptr).age       = 23
+ sizeof(Personne) = 36 octets
+--- R4 : pointeurs ---
+ apres doubler_copie(x) : x = 21
+ apres doubler_vrai(&x) : x = 42
+ p == NULL : true
+ test tableau (tab_test[0]) : 999
+--- R5 : memoire dynamique ---
+ tab = 0 1 4 9 16
+ apres realloc a 10 : 0 1 4 9 16 25 36 49 64 81
+ libere, pointeur remis a NULL
+--- R6 : liste chainee ---
+ liste : 50 -> 40 -> 30 -> 20 -> 10 -> NULL
+ longueur : 5
+ contient 30 : oui
+ contient 99 : non
+ liste vide, contient 30 : non
+ apres inserer_en_queue(5) [5 maillons parcourus] : 50 -> 40 -> 30 -> 20 -> 10 -> 5 -> NULL
+ apres suppression de 50 et 20 : 40 -> 30 -> 10 -> 5 -> NULL
+ liberee
+--- R7 : compter les operations ---
+        n     simple     double     moitie    n_log_n
+       10         10        100          4         40
+      100        100      10000          7        700
+     1000       1000    1000000         10      10000
+```
+
 ## Exercice 0
 
 Les fichiers `.o` sont des résultats intermédiaires propres à une compilation et à une machine. L'exécutable est lui aussi généré depuis les sources. On les ignore pour éviter de versionner des artefacts reproductibles et d'écraser ceux d'un autre environnement.
